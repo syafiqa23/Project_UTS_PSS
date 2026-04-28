@@ -1,0 +1,32 @@
+{% extends 'core/base.html' %}
+{% block title %}Statistik ORM - e-LMS UTS{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3">Statistik ORM dan Profiling</h1>
+<div class="row g-3">
+  <div class="col-md-6">
+    <div class="bg-white border rounded shadow-sm p-4 h-100">
+      <h2 class="h5">Statistik Mata Kuliah</h2>
+      <p class="text-secondary">Endpoint ini memakai aggregate, annotate, Count, Avg, Min, Max, dan select_related.</p>
+      <a class="btn btn-primary" href="{% url 'course_stat' %}">Buka JSON Course</a>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="bg-white border rounded shadow-sm p-4 h-100">
+      <h2 class="h5">Statistik Pengguna</h2>
+      <p class="text-secondary">Endpoint ini menghitung user aktif, user tanpa course, top member, dan top commenter.</p>
+      <a class="btn btn-primary" href="{% url 'user_statistics' %}">Buka JSON User</a>
+    </div>
+  </div>
+  <div class="col-12">
+    <div class="bg-white border rounded shadow-sm p-4">
+      <h2 class="h5">Profiling dan Optimasi ORM</h2>
+      <p class="text-secondary mb-3">
+        Jalankan halaman list/detail course lalu cek jumlah query di Django Silk. View utama sudah memakai
+        <code>select_related</code>, <code>prefetch_related</code>, dan <code>annotate</code> untuk mengurangi query berulang.
+      </p>
+      <a class="btn btn-outline-dark" href="/silk/">Buka Django Silk</a>
+      <a class="btn btn-outline-secondary" href="{% url 'statistik_api' %}">Dashboard API</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

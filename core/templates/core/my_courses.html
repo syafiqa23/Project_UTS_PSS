@@ -1,0 +1,15 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<h1 class="h3 mb-3">Matkul Saya</h1>
+<div class="list-group bg-white shadow-sm">
+  {% for m in memberships %}
+    <a class="list-group-item list-group-item-action" href="{% url 'course_detail' m.course_id.id %}">
+      <strong>{{ m.course_id.name }}</strong>
+      <span class="badge text-bg-primary ms-2">{{ m.get_roles_display }}</span>
+      <div class="small text-secondary">Pengajar: {{ m.course_id.teacher.username }}</div>
+    </a>
+  {% empty %}
+    <div class="list-group-item text-secondary">Belum mengikuti matkul apapun.</div>
+  {% endfor %}
+</div>
+{% endblock %}

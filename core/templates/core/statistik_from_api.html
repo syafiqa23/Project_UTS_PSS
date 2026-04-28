@@ -1,0 +1,46 @@
+{% extends 'core/base.html' %}
+{% block title %}Dashboard API - e-LMS UTS{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3">Dashboard Statistik dari API</h1>
+<div class="row g-3">
+  <div class="col-md-4">
+    <div class="bg-white border rounded shadow-sm p-4">
+      <div class="text-secondary">Total Course</div>
+      <div class="display-6 fw-bold" id="course-count">0</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="bg-white border rounded shadow-sm p-4">
+      <div class="text-secondary">User Non Admin</div>
+      <div class="display-6 fw-bold" id="user-count">0</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="bg-white border rounded shadow-sm p-4">
+      <div class="text-secondary">Komentar</div>
+      <div class="display-6 fw-bold" id="comment-count">0</div>
+    </div>
+  </div>
+</div>
+
+<pre class="bg-dark text-light rounded p-3 mt-4" id="raw-json">Loading...</pre>
+
+<script>
+async function loadStats() {
+  const [courseResponse, userResponse] = await Promise.all([
+    fetch("{% url 'course_stat' %}"),
+    fetch("{% url 'user_statistics' %}")
+  ]);
+  const courseData = await courseResponse.json();
+  const userData = await userResponse.json();
+
+  document.getElementById("course-count").textContent = courseData.course_count ?? 0;
+  document.getElementById("user-count").textContent = userData.total_non_admin_users ?? 0;
+  document.getElementById("comment-count").textContent = userData.total_comments_all ?? 0;
+  document.getElementById("raw-json").textContent = JSON.stringify({ courseData, userData }, null, 2);
+}
+loadStats().catch((error) => {
+  document.getElementById("raw-json").textContent = error;
+});
+</script>
+{% endblock %}

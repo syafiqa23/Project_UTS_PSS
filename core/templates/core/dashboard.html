@@ -1,0 +1,38 @@
+{% extends 'core/base.html' %}
+{% block content %}
+
+<div class="row g-4">
+
+  <div class="col-md-6">
+    <div class="card p-3">
+      <h5>Total Course</h5>
+      <div class="display-6">{{ total_courses }}</div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card p-3">
+      <h5>Total Komentar</h5>
+      <div class="display-6">{{ total_comments }}</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="bg-white p-4 mt-4 rounded shadow-sm">
+  <h4>Course Saya</h4>
+
+  <ul class="list-group">
+    {% for c in courses %}
+      <li class="list-group-item">
+        {{ c.course_id.name }}
+      </li>
+    {% empty %}
+      <li class="list-group-item text-muted">
+        Belum mengikuti course
+      </li>
+    {% endfor %}
+  </ul>
+</div>
+
+{% endblock %}

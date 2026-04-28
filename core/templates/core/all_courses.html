@@ -1,0 +1,38 @@
+{% extends 'core/base.html' %}
+{% block title %}Mata Kuliah - e-LMS UTS{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h1 class="h3 mb-1">Daftar Mata Kuliah</h1>
+    <p class="text-secondary mb-0">Data diambil dari model Course dengan annotation jumlah member dan konten.</p>
+  </div>
+  <a class="btn btn-outline-primary" href="{% url 'api_courses' %}">JSON</a>
+</div>
+
+<div class="row g-3">
+  {% for course in courses %}
+    <div class="col-md-6 col-xl-4">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <div class="d-flex justify-content-between gap-3">
+            <h2 class="h5 card-title">{{ course.name }}</h2>
+            <span class="badge text-bg-success align-self-start">Rp {{ course.price }}</span>
+          </div>
+          <p class="card-text text-secondary">{{ course.description|truncatewords:20 }}</p>
+          <p class="small mb-2">Pengajar: <strong>{{ course.teacher.username }}</strong></p>
+          <div class="d-flex gap-2 mb-3">
+            <span class="badge text-bg-light border">{{ course.member_count }} member</span>
+            <span class="badge text-bg-light border">{{ course.content_count }} konten</span>
+          </div>
+          <a class="btn btn-primary btn-sm" href="{% url 'course_detail' course.id %}">Detail</a>
+          <a class="btn btn-outline-secondary btn-sm" href="{% url 'course_content_list' course.id %}">Konten</a>
+        </div>
+      </div>
+    </div>
+  {% empty %}
+    <div class="col-12">
+      <div class="alert alert-warning">Belum ada mata kuliah. Jalankan <code>python manage.py seed_data</code>.</div>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

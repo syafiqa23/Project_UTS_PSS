@@ -1,0 +1,11 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<h2>List Mata Kuliah</h2>
+<ul>
+{% for c in courses %}
+  <li><a href="/course/{{ c.id }}/">{{ c.name }}</a></li>
+{% empty %}
+  <li>Tidak ada mata kuliah.</li>
+{% endfor %}
+</ul>
+{% endblock %}

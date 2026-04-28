@@ -1,0 +1,74 @@
+{% extends 'core/base.html' %}
+{% block content %}
+
+<div class="bg-white border rounded shadow-sm p-4 mb-4">
+  {% if can_assist %}
+    <a href="{% url 'edit_content' content.id %}" class="btn btn-warning btn-sm mb-3">
+      Edit Konten
+    </a>
+  {% endif %}
+
+  <a class="small" href="{% url 'course_detail' content.course_id.id %}">
+    {{ content.course_id.name }}
+  </a>
+
+  <h1 class="h3 mt-2">{{ content.name }}</h1>
+  <p class="text-secondary">{{ content.description }}</p>
+
+  {% if content.video_url %}
+    <p class="mb-1">
+      Video: <a href="{{ content.video_url }}">{{ content.video_url }}</a>
+    </p>
+  {% endif %}
+
+  {% if content.file_attachment %}
+    <p class="mb-0">
+      File: <a href="{{ content.file_attachment.url }}">Unduh materi</a>
+    </p>
+  {% endif %}
+</div>
+
+<div class="bg-white border rounded shadow-sm p-4">
+  <h2 class="h5 mb-3">Komentar</h2>
+
+  <div class="list-group mb-4">
+    {% for k in comments %}
+      <div class="list-group-item">
+        <div class="d-flex justify-content-between">
+          <strong>{{ k.member_id.user_id.username }}</strong>
+          <small class="text-secondary">
+            {{ k.created_at|date:"d M Y H:i" }}
+          </small>
+        </div>
+        <div>{{ k.comment }}</div>
+      </div>
+    {% empty %}
+      <div class="list-group-item text-secondary">
+        Belum ada komentar.
+      </div>
+    {% endfor %}
+  </div>
+
+  {% if can_view %}
+    <form method="post" action="{% url 'add_comment' content.id %}">
+      {% csrf_token %}
+      <label class="form-label">Tambah komentar</label>
+      <textarea name="comment" class="form-control" rows="3" required></textarea>
+      <button class="btn btn-primary mt-2">Kirim</button>
+    </form>
+  {% elif user.is_authenticated %}
+    <div class="alert alert-warning">
+      Anda harus bergabung dengan course untuk bisa berkomentar.
+      <br>
+      <a href="{% url 'join_course' content.course_id.id %}" class="btn btn-sm btn-primary mt-2">
+        Join Course
+      </a>
+    </div>
+  {% else %}
+    <p class="mb-0">
+      <a href="{% url 'login' %}?next={{ request.path }}">Login</a> untuk berkomentar.
+    </p>
+  {% endif %}
+</div>
+
+{% endblock %}

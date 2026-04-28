@@ -1,0 +1,4 @@
+username,email,password,is_staff
+john,john@gmail.com,12345,0
+alfy,alfy@gmail.com,12345,0
+risqi,risqi@gmail.com,12345,0

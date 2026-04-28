@@ -1,0 +1,23 @@
+{% extends 'core/base.html' %}
+{% block content %}
+
+<div class="bg-white p-4 rounded shadow-sm">
+  <h2>Edit Konten</h2>
+
+  <form method="post">
+    {% csrf_token %}
+
+    <label>Judul</label>
+    <input type="text" name="name" class="form-control mb-2" value="{{ content.name }}">
+
+    <label>Deskripsi</label>
+    <textarea name="description" class="form-control mb-2">{{ content.description }}</textarea>
+
+    <label>Video URL</label>
+    <input type="text" name="video_url" class="form-control mb-3" value="{{ content.video_url }}">
+
+    <button class="btn btn-primary">Simpan</button>
+  </form>
+</div>
+
+{% endblock %}

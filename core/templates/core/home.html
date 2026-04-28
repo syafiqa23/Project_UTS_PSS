@@ -1,0 +1,74 @@
+{% extends 'core/base.html' %}
+{% block title %}Home - e-LMS UTS{% endblock %}
+{% block content %}
+<div class="p-4 p-md-5 mb-4 bg-white border rounded shadow-sm">
+  <div class="row align-items-center g-4">
+    <div class="col-lg-8">
+      <span class="badge text-bg-info mb-3">Django Learning System</span>
+      <h1 class="display-6 fw-bold">Platform Pembelajaran Digital Berbasis Web</h1>
+      <p class="lead text-secondary mb-4">
+        Aplikasi ini memuat model mata kuliah, member, konten, komentar, endpoint statistik ORM,
+        optimasi query, seed data, Docker, admin Django, dan profiling memakai Django Silk.
+      </p>
+      <div class="d-flex flex-wrap gap-2">
+        <a class="btn btn-primary" href="{% url 'course_list' %}">Lihat Mata Kuliah</a>
+        <a class="btn btn-outline-secondary" href="{% url 'statistik' %}">Statistik ORM</a>
+        <a class="btn btn-outline-dark" href="/silk/">Django Silk</a>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="row g-3">
+        <div class="col-6 col-lg-12">
+          <div class="border rounded p-3 bg-light">
+            <div class="fs-3 fw-bold">{{ total_courses }}</div>
+            <div class="text-secondary">Mata Kuliah</div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-12">
+          <div class="border rounded p-3 bg-light">
+            <div class="fs-3 fw-bold">{{ total_users }}</div>
+            <div class="text-secondary">Pengguna</div>
+          </div>
+        </div>
+        <div class="col-12">
+          <div class="border rounded p-3 bg-light">
+            <div class="fs-3 fw-bold">{{ total_comments }}</div>
+            <div class="text-secondary">Komentar Diskusi</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-7">
+    <div class="bg-white border rounded shadow-sm p-4 h-100">
+      <h2 class="h5 mb-3">Mata Kuliah Populer</h2>
+      <div class="list-group list-group-flush">
+        {% for course in popular_courses %}
+          <a class="list-group-item list-group-item-action" href="{% url 'course_detail' course.id %}">
+            <div class="d-flex justify-content-between">
+              <strong>{{ course.name }}</strong>
+              <span class="badge text-bg-primary">{{ course.member_count }} member</span>
+            </div>
+            <small class="text-secondary">Pengajar: {{ course.teacher.username }}</small>
+          </a>
+        {% empty %}
+          <div class="text-secondary">Belum ada mata kuliah. Jalankan seed data terlebih dahulu.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-5">
+    <div class="bg-white border rounded shadow-sm p-4 h-100">
+      <h2 class="h5 mb-3">Endpoint Backend</h2>
+      <div class="list-group">
+        <a class="list-group-item list-group-item-action" href="{% url 'api_courses' %}">/api/courses/</a>
+        <a class="list-group-item list-group-item-action" href="{% url 'course_stat' %}">/api/course-stat/</a>
+        <a class="list-group-item list-group-item-action" href="{% url 'user_statistics' %}">/api/user-stats/</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
