@@ -1,0 +1,92 @@
+{% extends 'core/base.html' %}
+{% block title %}Statistik Course - e-LMS UTS{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-start gap-3 mb-4">
+  <div>
+    <h1 class="h3 mb-2">Statistik Mata Kuliah</h1>
+    <p class="text-secondary mb-0">Data statistik course ditampilkan sebagai halaman, bukan JSON.</p>
+  </div>
+  <a class="btn btn-outline-secondary" href="{% url 'statistik' %}">Kembali ke Statistik</a>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="bg-white border rounded shadow-sm p-4 h-100">
+      <div class="text-secondary">Mata Kuliah</div>
+      <div class="display-6 fw-bold">{{ course_stats.course_count }}</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="bg-white border rounded shadow-sm p-4 h-100">
+      <div class="text-secondary">Subscriber</div>
+      <div class="display-6 fw-bold">{{ course_stats.member_count }}</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="bg-white border rounded shadow-sm p-4 h-100">
+      <div class="text-secondary">Konten</div>
+      <div class="display-6 fw-bold">{{ course_stats.content_count }}</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="bg-white border rounded shadow-sm p-4 h-100">
+      <div class="text-secondary">Komentar</div>
+      <div class="display-6 fw-bold">{{ course_stats.comment_count }}</div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-lg-4">
+    <div class="bg-white border rounded shadow-sm p-4 h-100">
+      <h2 class="h5">Harga Kursus</h2>
+      <p class="mb-2">Min: <strong>Rp {{ course_stats.price_statistics.min_price|default:0 }}</strong></p>
+      <p class="mb-2">Maks: <strong>Rp {{ course_stats.price_statistics.max_price|default:0 }}</strong></p>
+      <p class="mb-0">Rata-rata: <strong>Rp {{ course_stats.price_statistics.avg_price|floatformat:0|default:0 }}</strong></p>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="bg-white border rounded shadow-sm p-4 h-100">
+      <h2 class="h5">Termurah</h2>
+      {% for course in course_stats.cheapest %}
+        <div class="mb-2">
+          <strong>{{ course.name }}</strong>
+          <div class="text-secondary">Rp {{ course.price }}</div>
+        </div>
+      {% empty %}
+        <div class="text-secondary">Belum ada data.</div>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="bg-white border rounded shadow-sm p-4 h-100">
+      <h2 class="h5">Termahal</h2>
+      {% for course in course_stats.expensive %}
+        <div class="mb-2">
+          <strong>{{ course.name }}</strong>
+          <div class="text-secondary">Rp {{ course.price }}</div>
+        </div>
+      {% empty %}
+        <div class="text-secondary">Belum ada data.</div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<div class="bg-white border rounded shadow-sm p-4">
+  <h2 class="h5 mb-3">Course Populer</h2>
+  <div class="list-group list-group-flush">
+    {% for course in course_stats.popular %}
+      <a class="list-group-item list-group-item-action" href="{% url 'course_detail' course.id %}">
+        <div class="d-flex justify-content-between gap-3">
+          <strong>{{ course.name }}</strong>
+          <span>{{ course.member_count }} member</span>
+        </div>
+        <small class="text-secondary">Pengajar: {{ course.teacher.username }}</small>
+      </a>
+    {% empty %}
+      <div class="text-secondary">Belum ada course populer.</div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

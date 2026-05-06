@@ -1,14 +1,12 @@
 ﻿from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.models import User
-from django.core import serializers
 from django.db.models import Avg, Count, Max, Min, Prefetch
-from django.http import HttpResponseBadRequest, JsonResponse, HttpResponseForbidden
+from django.http import HttpResponseBadRequest, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
 from django.contrib.auth.views import redirect_to_login
 from .services.import_csv_service import import_courses, import_users, import_members
-from django.urls import reverse
 
 from .models import Comment, Course, CourseContent, CourseMember
 
@@ -189,44 +187,37 @@ def dashboard(request):
 
 
 def statistik(request):
-    return render(request, "core/statistik.html")
+    return render(request, "core/statistik.html", _get_statistics_context())
 
 
 def statistik_from_api(request):
-    return render(request, "core/statistik_from_api.html")
+    return render(request, "core/statistik_from_api.html", _get_statistics_context())
 
 
-def courseStat(request):
-    courses = Course.objects.all()
+def _get_course_statistics():
+    courses = Course.objects.select_related("teacher")
     stats = courses.aggregate(max_price=Max("price"), min_price=Min("price"), avg_price=Avg("price"))
-
-    cheapest = Course.objects.filter(price=stats["min_price"]).select_related("teacher")
-    expensive = Course.objects.filter(price=stats["max_price"]).select_related("teacher")
-    popular = (
-        Course.objects.select_related("teacher")
-        .annotate(member_count=Count("coursemember"))
-        .order_by("-member_count", "name")[:5]
-    )
-    unpopular = (
-        Course.objects.select_related("teacher")
-        .annotate(member_count=Count("coursemember"))
-        .order_by("member_count", "name")[:5]
+    annotated_courses = courses.annotate(
+        member_count=Count("coursemember", distinct=True),
+        content_count=Count("coursecontent", distinct=True),
     )
 
-    return JsonResponse(
-        {
-            "course_count": courses.count(),
-            "price_statistics": stats,
-            "cheapest": serializers.serialize("python", cheapest),
-            "expensive": serializers.serialize("python", expensive),
-            "popular": serializers.serialize("python", popular),
-            "unpopular": serializers.serialize("python", unpopular),
-        }
-    )
+    return {
+        "course_count": courses.count(),
+        "content_count": CourseContent.objects.count(),
+        "member_count": CourseMember.objects.count(),
+        "comment_count": Comment.objects.count(),
+        "price_statistics": stats,
+        "cheapest": annotated_courses.filter(price=stats["min_price"]).order_by("name"),
+        "expensive": annotated_courses.filter(price=stats["max_price"]).order_by("name"),
+        "popular": annotated_courses.order_by("-member_count", "name")[:5],
+        "unpopular": annotated_courses.order_by("member_count", "name")[:5],
+        "courses": annotated_courses.order_by("name"),
+    }
 
 
-def userStatistics(request):
-    non_admin_users = User.objects.filter(is_staff=False, is_superuser=False)
+def _get_user_statistics():
+    non_admin_users = User.objects.filter(is_staff=False, is_superuser=False).order_by("username")
     users_with_courses = non_admin_users.filter(coursemember__isnull=False).distinct()
     users_without_courses = non_admin_users.exclude(id__in=users_with_courses.values("id"))
 
@@ -254,37 +245,44 @@ def userStatistics(request):
         .first()
     )
 
-    return JsonResponse(
-        {
-            "total_non_admin_users": non_admin_users.count(),
-            "total_users_with_courses": users_with_courses.count(),
-            "total_users_without_courses": users_without_courses.count(),
-            "average_courses_per_user": avg_courses_per_user,
-            "top_user": {
-                "id": top_member["user_id"],
-                "username": top_member["user_id__username"],
-                "email": top_member["user_id__email"],
-                "total_courses": top_member["total"],
-            }
-            if top_member
-            else {},
-            "users_no_courses": list(
-                non_admin_users.exclude(id__in=CourseMember.objects.values("user_id")).values(
-                    "id", "username", "email"
-                )
-            ),
-            "total_comments_all": Comment.objects.count(),
-            "total_comments_non_admin": Comment.objects.filter(member_id__user_id__in=non_admin_users).count(),
-            "top_commenter": {
-                "id": top_commenter["member_id__user_id"],
-                "username": top_commenter["member_id__user_id__username"],
-                "email": top_commenter["member_id__user_id__email"],
-                "total_comments": top_commenter["total_comments"],
-            }
-            if top_commenter
-            else {},
+    return {
+        "total_non_admin_users": non_admin_users.count(),
+        "total_users_with_courses": users_with_courses.count(),
+        "total_users_without_courses": users_without_courses.count(),
+        "average_courses_per_user": avg_courses_per_user,
+        "top_user": {
+            "username": top_member["user_id__username"],
+            "email": top_member["user_id__email"],
+            "total_courses": top_member["total"],
         }
-    )
+        if top_member
+        else None,
+        "users_no_courses": users_without_courses,
+        "total_comments_all": Comment.objects.count(),
+        "total_comments_non_admin": Comment.objects.filter(member_id__user_id__in=non_admin_users).count(),
+        "top_commenter": {
+            "username": top_commenter["member_id__user_id__username"],
+            "email": top_commenter["member_id__user_id__email"],
+            "total_comments": top_commenter["total_comments"],
+        }
+        if top_commenter
+        else None,
+    }
+
+
+def _get_statistics_context():
+    return {
+        "course_stats": _get_course_statistics(),
+        "user_stats": _get_user_statistics(),
+    }
+
+
+def courseStat(request):
+    return render(request, "core/course_stat.html", {"course_stats": _get_course_statistics()})
+
+
+def userStatistics(request):
+    return render(request, "core/user_statistics.html", {"user_stats": _get_user_statistics()})
 
 
 def api_courses(request):
@@ -297,21 +295,7 @@ def api_courses(request):
         .annotate(member_count=Count("coursemember", distinct=True), content_count=Count("coursecontent", distinct=True))
         .order_by("name")
     )
-
-    data = [
-        {
-            "id": course.id,
-            "name": course.name,
-            "description": course.description,
-            "price": course.price,
-            "teacher": course.teacher.username,
-            "member_count": course.member_count,
-            "content_count": course.content_count,
-            "url": request.build_absolute_uri(reverse("course_detail", args=[course.id])),
-        }
-        for course in courses
-    ]
-    return JsonResponse({"results": data})
+    return render(request, "core/api_courses.html", {"courses": courses})
 
 @staff_member_required(login_url="/admin/login/")
 def upload_csv(request):

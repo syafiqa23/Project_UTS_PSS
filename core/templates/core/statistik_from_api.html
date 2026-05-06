@@ -1,46 +1,51 @@
 {% extends 'core/base.html' %}
-{% block title %}Dashboard API - e-LMS UTS{% endblock %}
+{% block title %}Dashboard Statistik - e-LMS UTS{% endblock %}
 {% block content %}
-<h1 class="h3 mb-3">Dashboard Statistik dari API</h1>
-<div class="row g-3">
+<div class="d-flex justify-content-between align-items-start gap-3 mb-4">
+  <div>
+    <h1 class="h3 mb-2">Dashboard Statistik</h1>
+    <p class="text-secondary mb-0">Halaman ini menggantikan tampilan raw JSON dengan kartu ringkasan data.</p>
+  </div>
+  <a class="btn btn-outline-secondary" href="{% url 'statistik' %}">Ringkasan Lengkap</a>
+</div>
+
+<div class="row g-3 mb-4">
   <div class="col-md-4">
-    <div class="bg-white border rounded shadow-sm p-4">
+    <div class="bg-white border rounded shadow-sm p-4 h-100">
       <div class="text-secondary">Total Course</div>
-      <div class="display-6 fw-bold" id="course-count">0</div>
+      <div class="display-6 fw-bold">{{ course_stats.course_count }}</div>
     </div>
   </div>
   <div class="col-md-4">
-    <div class="bg-white border rounded shadow-sm p-4">
+    <div class="bg-white border rounded shadow-sm p-4 h-100">
       <div class="text-secondary">User Non Admin</div>
-      <div class="display-6 fw-bold" id="user-count">0</div>
+      <div class="display-6 fw-bold">{{ user_stats.total_non_admin_users }}</div>
     </div>
   </div>
   <div class="col-md-4">
-    <div class="bg-white border rounded shadow-sm p-4">
+    <div class="bg-white border rounded shadow-sm p-4 h-100">
       <div class="text-secondary">Komentar</div>
-      <div class="display-6 fw-bold" id="comment-count">0</div>
+      <div class="display-6 fw-bold">{{ user_stats.total_comments_all }}</div>
     </div>
   </div>
 </div>
 
-<pre class="bg-dark text-light rounded p-3 mt-4" id="raw-json">Loading...</pre>
-
-<script>
-async function loadStats() {
-  const [courseResponse, userResponse] = await Promise.all([
-    fetch("{% url 'course_stat' %}"),
-    fetch("{% url 'user_statistics' %}")
-  ]);
-  const courseData = await courseResponse.json();
-  const userData = await userResponse.json();
-
-  document.getElementById("course-count").textContent = courseData.course_count ?? 0;
-  document.getElementById("user-count").textContent = userData.total_non_admin_users ?? 0;
-  document.getElementById("comment-count").textContent = userData.total_comments_all ?? 0;
-  document.getElementById("raw-json").textContent = JSON.stringify({ courseData, userData }, null, 2);
-}
-loadStats().catch((error) => {
-  document.getElementById("raw-json").textContent = error;
-});
-</script>
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="bg-white border rounded shadow-sm p-4 h-100">
+      <h2 class="h5 mb-3">Statistik Course</h2>
+      <p class="mb-2">Harga minimum: <strong>Rp {{ course_stats.price_statistics.min_price|default:0 }}</strong></p>
+      <p class="mb-2">Harga maksimum: <strong>Rp {{ course_stats.price_statistics.max_price|default:0 }}</strong></p>
+      <p class="mb-0">Harga rata-rata: <strong>Rp {{ course_stats.price_statistics.avg_price|floatformat:0|default:0 }}</strong></p>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="bg-white border rounded shadow-sm p-4 h-100">
+      <h2 class="h5 mb-3">Statistik User</h2>
+      <p class="mb-2">User sudah join course: <strong>{{ user_stats.total_users_with_courses }}</strong></p>
+      <p class="mb-2">User belum join course: <strong>{{ user_stats.total_users_without_courses }}</strong></p>
+      <p class="mb-0">Rata-rata course per user: <strong>{{ user_stats.average_courses_per_user|floatformat:1 }}</strong></p>
+    </div>
+  </div>
+</div>
 {% endblock %}

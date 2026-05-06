@@ -1,32 +1,174 @@
 {% extends 'core/base.html' %}
-{% block title %}Statistik ORM - e-LMS UTS{% endblock %}
+{% block title %}Statistik - e-LMS UTS{% endblock %}
 {% block content %}
-<h1 class="h3 mb-3">Statistik ORM dan Profiling</h1>
-<div class="row g-3">
-  <div class="col-md-6">
-    <div class="bg-white border rounded shadow-sm p-4 h-100">
-      <h2 class="h5">Statistik Mata Kuliah</h2>
-      <p class="text-secondary">Endpoint ini memakai aggregate, annotate, Count, Avg, Min, Max, dan select_related.</p>
-      <a class="btn btn-primary" href="{% url 'course_stat' %}">Buka JSON Course</a>
+<style>
+  .stats-hero {
+    background:
+      radial-gradient(circle at 88% 12%, rgba(124, 58, 237, 0.34), transparent 24rem),
+      radial-gradient(circle at 86% 88%, rgba(6, 182, 212, 0.22), transparent 26rem),
+      linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(8, 13, 29, 0.96));
+    border: 1px solid rgba(125, 211, 252, 0.16);
+    border-radius: 8px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.42);
+  }
+
+  .stats-label {
+    color: #93c5fd;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.12rem;
+    text-transform: uppercase;
+  }
+
+  .metric-card,
+  .info-panel,
+  .course-row {
+    background: rgba(11, 18, 32, 0.72);
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    border-radius: 8px;
+  }
+
+  .metric-card {
+    min-height: 96px;
+  }
+
+  .metric-value {
+    color: #e6eef6;
+    font-size: 2.1rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .metric-name {
+    color: #94a3b8;
+    font-weight: 700;
+  }
+
+  .accent-panel {
+    border-left: 4px solid #06b6d4;
+  }
+
+  .price-text {
+    color: #22d3ee;
+    font-weight: 800;
+  }
+</style>
+
+<section class="stats-hero p-4 p-md-5 mb-4">
+  <div class="mb-4">
+    <h1 class="display-6 fw-bold mb-3">Statistik Simple LMS</h1>
+    <p class="lead text-secondary mb-0">
+      Ringkasan data dari model admin Django, ditampilkan sebagai halaman web agar mudah dibaca saat demo ORM.
+    </p>
+  </div>
+
+  <div class="d-flex flex-wrap gap-2 mb-4">
+    <span class="badge rounded-pill px-3 py-2">Django Framework</span>
+    <span class="badge rounded-pill px-3 py-2">ORM Dasar</span>
+    <span class="badge rounded-pill px-3 py-2">Profiling dengan Silk</span>
+  </div>
+
+  <div class="info-panel p-4 mb-4">
+    <div class="stats-label mb-2">Ringkasan Data</div>
+    <p class="text-secondary mb-4">Angka entitas dari aplikasi CORE di Django Admin.</p>
+    <div class="row g-3">
+      <div class="col-6 col-lg-2">
+        <div class="metric-card p-3 text-center">
+          <div class="metric-value">{{ course_stats.course_count }}</div>
+          <div class="metric-name">Mata Kuliah</div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-2">
+        <div class="metric-card p-3 text-center">
+          <div class="metric-value">{{ course_stats.member_count }}</div>
+          <div class="metric-name">Subscriber</div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-2">
+        <div class="metric-card p-3 text-center">
+          <div class="metric-value">{{ course_stats.content_count }}</div>
+          <div class="metric-name">Konten</div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-2">
+        <div class="metric-card p-3 text-center">
+          <div class="metric-value">{{ course_stats.comment_count }}</div>
+          <div class="metric-name">Komentar</div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-2">
+        <div class="metric-card p-3 text-center">
+          <div class="metric-value">{{ user_stats.total_users_with_courses }}</div>
+          <div class="metric-name">User Aktif</div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-2">
+        <div class="metric-card p-3 text-center">
+          <div class="metric-value">{{ user_stats.total_non_admin_users }}</div>
+          <div class="metric-name">Non Admin</div>
+        </div>
+      </div>
     </div>
   </div>
-  <div class="col-md-6">
-    <div class="bg-white border rounded shadow-sm p-4 h-100">
-      <h2 class="h5">Statistik Pengguna</h2>
-      <p class="text-secondary">Endpoint ini menghitung user aktif, user tanpa course, top member, dan top commenter.</p>
-      <a class="btn btn-primary" href="{% url 'user_statistics' %}">Buka JSON User</a>
+
+  <div class="row g-3">
+    <div class="col-lg-6">
+      <div class="info-panel accent-panel p-4 h-100">
+        <div class="stats-label mb-3">Harga Kursus</div>
+        <div class="text-secondary">Rentang harga</div>
+        <div>Min <strong>Rp {{ course_stats.price_statistics.min_price|default:0 }}</strong> -
+          Maks <strong>Rp {{ course_stats.price_statistics.max_price|default:0 }}</strong></div>
+        <div>Rata-rata <strong>Rp {{ course_stats.price_statistics.avg_price|floatformat:0|default:0 }}</strong></div>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="info-panel accent-panel p-4 h-100">
+        <div class="stats-label mb-3">Kursus Terpopuler</div>
+        {% for course in course_stats.popular %}
+          {% if forloop.first %}
+            <h2 class="h5 mb-1">{{ course.name }}</h2>
+            <div class="text-secondary">{{ course.member_count }} member terdaftar</div>
+          {% endif %}
+        {% empty %}
+          <div class="text-secondary">Belum ada data mata kuliah.</div>
+        {% endfor %}
+      </div>
     </div>
   </div>
-  <div class="col-12">
-    <div class="bg-white border rounded shadow-sm p-4">
-      <h2 class="h5">Profiling dan Optimasi ORM</h2>
-      <p class="text-secondary mb-3">
-        Jalankan halaman list/detail course lalu cek jumlah query di Django Silk. View utama sudah memakai
-        <code>select_related</code>, <code>prefetch_related</code>, dan <code>annotate</code> untuk mengurangi query berulang.
-      </p>
-      <a class="btn btn-outline-dark" href="/silk/">Buka Django Silk</a>
-      <a class="btn btn-outline-secondary" href="{% url 'statistik_api' %}">Dashboard API</a>
-    </div>
+</section>
+
+<section class="info-panel p-4 mb-4">
+  <div class="stats-label mb-3">Daftar Mata Kuliah</div>
+  <p class="text-secondary">Data model Mata Kuliah memakai <code>select_related</code> dan <code>annotate</code>.</p>
+
+  <div class="d-grid gap-3">
+    {% for course in course_stats.courses %}
+      <div class="course-row p-3 d-flex flex-column flex-md-row justify-content-between gap-3">
+        <div>
+          <h2 class="h5 mb-2">{{ course.name }}</h2>
+          <div class="text-secondary mb-2">Pengajar: <strong>{{ course.teacher.username }}</strong></div>
+          <div class="text-secondary">{{ course.description|default:"-" }}</div>
+        </div>
+        <div class="text-md-end flex-shrink-0">
+          <div class="price-text fs-5">Rp {{ course.price }}</div>
+          <div class="text-secondary">{{ course.member_count }} member</div>
+          <div class="text-secondary">{{ course.content_count }} konten</div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="text-secondary">Belum ada mata kuliah. Jalankan seed data terlebih dahulu.</div>
+    {% endfor %}
   </div>
-</div>
+</section>
+
+<section class="info-panel p-4">
+  <div class="stats-label mb-3">Alat Bantu</div>
+  <p class="text-secondary">Admin untuk CRUD data, Silk untuk melihat query SQL dan waktu request.</p>
+  <div class="d-flex flex-wrap gap-2">
+    <a class="btn btn-primary" href="/admin/">Admin Dashboard</a>
+    <a class="btn btn-outline-dark" href="/silk/">ORM Profiler (Silk)</a>
+    <a class="btn btn-outline-secondary" href="{% url 'course_stat' %}">Detail Statistik Course</a>
+    <a class="btn btn-outline-secondary" href="{% url 'user_statistics' %}">Detail Statistik User</a>
+  </div>
+</section>
 {% endblock %}

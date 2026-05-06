@@ -7,7 +7,7 @@
       <span class="badge text-bg-info mb-3">Django Learning System</span>
       <h1 class="display-6 fw-bold">Platform Pembelajaran Digital Berbasis Web</h1>
       <p class="lead text-secondary mb-4">
-        Aplikasi ini memuat model mata kuliah, member, konten, komentar, endpoint statistik ORM,
+        Aplikasi ini memuat model mata kuliah, member, konten, komentar, halaman statistik ORM,
         optimasi query, seed data, Docker, admin Django, dan profiling memakai Django Silk.
       </p>
       <div class="d-flex flex-wrap gap-2">
@@ -62,11 +62,11 @@
   </div>
   <div class="col-lg-5">
     <div class="bg-white border rounded shadow-sm p-4 h-100">
-      <h2 class="h5 mb-3">Endpoint Backend</h2>
+      <h2 class="h5 mb-3">Halaman Backend</h2>
       <div class="list-group">
-        <a class="list-group-item list-group-item-action" href="{% url 'api_courses' %}">/api/courses/</a>
-        <a class="list-group-item list-group-item-action" href="{% url 'course_stat' %}">/api/course-stat/</a>
-        <a class="list-group-item list-group-item-action" href="{% url 'user_statistics' %}">/api/user-stats/</a>
+        <a class="list-group-item list-group-item-action" href="{% url 'api_courses' %}">Data mata kuliah</a>
+        <a class="list-group-item list-group-item-action" href="{% url 'course_stat' %}">Statistik course</a>
+        <a class="list-group-item list-group-item-action" href="{% url 'user_statistics' %}">Statistik user</a>
       </div>
     </div>
   </div>
